@@ -1,0 +1,4 @@
+interface:
+  display_name: "客户初判"
+  short_description: "跨境客户拜访前画像与痛点预判"
+  default_prompt: "Use $assess-customer-initial to create a CSM pre-visit customer judgment card from limited cross-border ecommerce customer fields."

@@ -43,7 +43,17 @@ description: Diagnose cross-border ecommerce customer RPA application assets and
 
 ### 3.1 主要参考文件
 
-如当前任务中提供了《跨境电商：自动化机会地图.xlsx》，必须优先以该文件作为场景匹配参照。
+本 skill 已内置默认机会地图：
+
+```text
+references/跨境电商：自动化机会地图.xlsx
+```
+
+使用本 skill 时，必须先尝试打开该文件，并将其作为场景匹配、覆盖分析和查漏补缺的主要参照。
+
+如果当前任务中用户另行提供了新版《跨境电商：自动化机会地图.xlsx》，则优先使用用户当次提供的文件；否则使用上述 skill 内置文件。
+
+读取注意：该 Excel 的部分工作表维度标记可能让 `openpyxl` 的 `read_only=True` 模式只读到 A1。需要读取结构化机会点时，优先使用 `load_workbook(..., read_only=False, data_only=True)`，或用 XML/其他方式读取实际单元格内容。
 
 该机会地图通常包含：
 
@@ -1307,4 +1317,3 @@ AI生成低效词候选清单，运营人工确认后由 RPA 批量执行。
 ## 20. 一句话工作流
 
 **输入客户 RPA 应用名称 → 拆解业务语义 → 匹配机会地图 → 生成应用画像 → 对照场景地图查漏补缺 → 找相邻拓展链路 → 判断 AI+RPA 升级机会 → 过滤风险与优先级 → 输出带模块小结的 CSM 下一步推进建议。**
-

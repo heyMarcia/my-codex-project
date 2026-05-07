@@ -1,0 +1,4 @@
+interface:
+  display_name: "应用资产诊断"
+  short_description: "诊断跨境电商RPA应用资产并生成AI拓展和CSM建议"
+  default_prompt: "Use $diagnose-rpa-assets to analyze a customer's RPA app list and recommend adjacent AI+RPA expansion opportunities."

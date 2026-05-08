@@ -3,869 +3,265 @@ name: diagnose-rpa-assets
 description: Diagnose cross-border ecommerce customer RPA application assets and recommend adjacent AI+RPA expansion opportunities. Use when the user provides RPA app names, automation inventories, customer background, or an opportunity-map spreadsheet for Amazon/TikTok/Temu/eBay/Shopify/Ozon/Shopee/Lazada sellers and wants application classification, current automation maturity, opportunity-map coverage, gap analysis, prioritized adjacent expansion ideas, AI+RPA upgrade paths, risks, and CSM next-step recommendations. Do not use for customers with no landed RPA applications; use assess-customer-initial instead.
 ---
 
-# 跨境电商 RPA 应用资产诊断与需求拓展 Skill
+# Cross-Border Ecommerce RPA Asset Diagnosis
 
-版本：V0.3
+Version: V0.4
 
-## 0. 执行契约
+Use this skill to diagnose a customer's existing RPA application assets and turn them into adjacent AI+RPA expansion opportunities. The job is not to list every possible automation scenario. The job is to infer the customer's current automation profile, business focus, value gaps, adjacent expansion paths, and the next demand-entry points a CSM should verify.
 
-本 Skill 的角色不是“场景大全推荐器”，而是：
+For the Chinese human-readable counterpart, see `SKILL_CN.md`.
 
-> **从客户已经做过的 RPA 应用资产里，反推出客户当前自动化使用画像、业务关注点、价值断点、相邻拓展机会，以及下一步 CSM 最应该验证的需求入口。**
+## Core Contract
 
-执行时必须遵守以下契约：
+Always start from the customer's existing RPA assets.
 
-1. **必须从现有应用资产出发**：先分析客户已经自动化了什么，再判断下一步适合拓展什么。
-2. **必须区分事实、推断、假设**：不能把应用名称推断出的可能性，当成客户真实痛点。
-3. **必须做相邻链路拓展**：优先推荐“已有应用的下一步 / 同岗位加深 / 同数据链路延伸 / AI+RPA 升级”，而不是泛泛罗列机会地图。
-4. **必须做风险过滤**：每个 P0 / P1 建议都要检查 ERP、API、自研、网页稳定性、AI 信任、业务责任边界风险。
-5. **必须服务于 CSM 下一步动作**：最终输出要能帮助 CSM 判断找谁聊、先聊什么、怎么追问、试点选什么。
-6. **不得脱离应用清单直接生成完整方案**：本 Skill 输出的是诊断与拓展作战建议，不是正式项目方案、报价方案或实施计划。
-7. **不得复读机会地图**：机会地图是参照系，不是复制源。只能输出与客户已有应用、客户背景或业务目标有关的缺口。
+1. Analyze what the customer has already automated before recommending what to expand.
+2. Separate confirmed facts, reasonable inferences, and hypotheses to verify.
+3. Recommend adjacent expansion paths: next step of the same app, deeper work in the same role, same data-chain extension, or AI+RPA upgrade.
+4. Risk-filter every P0/P1 recommendation for ERP, API, in-house system, page stability, AI trust, data definition, and business ownership risks.
+5. Serve the CSM's next action: whom to talk to, what to ask first, how to probe, and which pilot to choose.
+6. Do not generate a full project plan, quote, or implementation schedule unless the user explicitly asks after the diagnosis.
+7. Do not copy the opportunity map as a scenario list. Use it only as a reference.
 
----
+## When To Use
 
-## 1. Skill 定位
+Use this skill when the user provides any of the following:
 
-你是一位资深跨境电商数字化解决方案专家，熟悉 Amazon / TikTok Shop / Temu / eBay / Shopify / Ozon / Shopee / Lazada 等平台卖家的运营、广告、财务、供应链、仓储物流、客服售后、产品选品、市场营销和管理决策链路，也理解 RPA、AI、AI+RPA 的落地边界。
+- Existing RPA app names, robot names, automation inventory, screenshots, or exported app data.
+- A request to identify which business roles, workflows, or departments current RPA apps cover.
+- A request to infer next expansion needs from existing RPA apps.
+- A request to compare current apps with a cross-border ecommerce automation opportunity map.
+- A request to identify which existing RPA apps can become AI+RPA pilots.
+- A CSM use case such as renewal, upsell, AI pilot, executive report, customer visit, or demand discovery.
 
-你的任务是：
+Do not use this skill when the customer has no landed RPA apps or no app list. Use `assess-customer-initial` instead. If the user provides meeting notes without an extracted app list, first extract the app facts. If the user asks for stability, success rate, or usage-rate evaluation, request or use runtime data; app names alone only support name-level diagnosis.
 
-> **根据客户现有 RPA 应用名称及可选业务背景，识别客户当前自动化使用画像；对照跨境电商自动化机会地图，判断下一步最值得拓展的业务方向、AI+RPA 升级路径、风险边界和 CSM 推进建议。**
+## Default Reference
 
-一句话目标：
-
-> **输入客户 RPA 应用资产 → 拆解业务语义 → 识别当前使用画像 → 对照机会地图查漏补缺 → 找相邻拓展链路 → 判断 AI+RPA 升级机会 → 过滤落地风险 → 输出 CSM 下一步作战卡。**
-
----
-
-## 2. When to Use / When Not to Use
-
-### 2.1 必须使用本 Skill 的场景
-
-当满足以下任一情况时，使用本 Skill：
-
-1. 用户提供了客户现有 RPA 应用名称列表、应用清单、机器人列表或应用截图。
-2. 用户想知道客户目前把 RPA 用在哪些业务环节、哪些部门、哪些岗位。
-3. 用户想根据已有应用判断客户下一步适合拓展什么需求。
-4. 用户想对照跨境电商自动化机会地图，判断哪些方向已覆盖、哪些方向可查漏补缺。
-5. 用户想判断已有 RPA 应用是否可以升级为 AI+RPA 试点。
-6. 用户要做续费、增购、AI 试点、高层汇报、业务拜访或需求挖掘前的客户应用资产诊断。
-
-### 2.2 不应使用本 Skill 的场景
-
-以下情况不要使用本 Skill，或只作为辅助：
-
-| 场景 | 正确处理 |
-|---|---|
-| 客户尚未落地任何 RPA 应用，也没有应用清单 | 使用“客户初判与痛点预判 Skill” |
-| 只有客户行业、类目、平台、团队规模，没有应用名称 | 使用客户初判 Skill，不要假装做应用资产诊断 |
-| 用户要求诊断单个技术问题，如某个网页自动化报错 | 使用技术排障 / 应用维护类 Skill |
-| 用户要求生成完整项目方案、报价方案、实施排期 | 先用本 Skill 做诊断，再进入项目方案 Skill |
-| 用户提供会议录音或访谈文本，尚未提炼应用清单 | 先用会议去噪 / 信息抽取 Skill 提取应用与事实 |
-| 用户要评估已上线应用的稳定性、运行频次、报错率、使用率 | 需要补充运行数据；本 Skill 只能先做名称级诊断 |
-
-如客户没有已落地 RPA 应用清单，优先使用 `$assess-customer-initial` 做客户初判；本 Skill 只适合在已有应用资产基础上做诊断和拓展。
-
----
-
-## 2.3 默认参考资料
-
-本 Skill 已内置默认机会地图：
+The default opportunity map is:
 
 ```text
-references/跨境电商：自动化机会地图.xlsx
+references/cross-border-ecommerce-automation-opportunity-map.xlsx
 ```
 
-使用本 Skill 时，必须先尝试打开该文件，并将其作为场景匹配、覆盖分析和查漏补缺的主要参照。如果用户当次另行提供了新版机会地图，则优先使用用户提供的文件。
+When using this skill, try to open this file first and use it as the main reference for scenario matching, coverage analysis, and gap finding. If the user provides a newer opportunity map, use the user's file instead.
 
-读取注意：该 Excel 的部分工作表维度标记可能让 `openpyxl` 的 `read_only=True` 模式只读到 A1。需要读取结构化机会点时，优先使用 `load_workbook(..., read_only=False, data_only=True)`，或用 XML / 其他方式读取实际单元格内容。
+Read the Excel with `openpyxl.load_workbook(..., read_only=False, data_only=True)` when possible. Some sheets may appear as only `A1` in `read_only=True` mode because of worksheet dimension metadata.
 
----
+## Input Handling
 
-## 3. 输入要求
-
-### 3.1 最小输入
-
-用户只提供应用名称时，也必须能继续分析，但只能做保守判断。
+Minimum input:
 
 ```text
-客户名称：可选
-
-RPA 应用名称列表：
-1.
-2.
-3.
-4.
-5.
-```
-
-最小输入下允许输出：
-
-- 应用名称语义拆解
-- 应用归属岗位 / 工作流的保守判断
-- 当前 RPA 使用画像
-- 疑似业务重点
-- 相邻拓展方向
-- 待确认问题
-
-最小输入下禁止输出：
-
-- 过度确定的客户类型
-- 组织结构判断
-- 老板意图判断
-- 真实痛点断言
-- 完整解决方案承诺
-
-### 3.2 增强输入
-
-推荐输入以下字段。字段允许缺失。
-
-```text
-客户名称：
-客户类型：品牌型 / 精品型 / 精铺型 / 铺货型 / 未知
-主营平台：Amazon / TikTok / Temu / eBay / Shopify / Ozon / Shopee / Lazada / 多平台 / 其他
-类目：
-具体品类：
-供货模式：贸易 / 研产销一体 / OEM / ODM / 1688 / 代理经销 / 自有工厂 / 未知
-卖货模式：平台电商 / 独立站 / 多平台 / 未知
-当前 ERP / 系统：领星 / 积加 / 店小秘 / 马帮 / 自研系统 / 未知
-团队规模：
-运营人数：
-SKU 数量：
-店铺数量：
-应用使用情况：稳定运行 / 部分停用 / 低频使用 / 不清楚
-当前目标：续费 / 增购 / AI试点 / 高层汇报 / 业务拜访 / 需求挖掘 / 未知
-
-RPA 应用名称列表：
+Customer name: optional
+RPA app names:
 1.
 2.
 3.
 ```
 
-### 3.3 字段缺失处理原则
+Preferred additional fields: customer type, sales platforms, category, product type, supply model, ERP/system, team size, SKU count, store count, app usage state, and current objective.
 
-| 字段情况 | 处理方式 |
+If fields are missing, do not stop and do not invent facts. Continue with conservative conclusions and place missing items in "questions to verify".
+
+Boundary rules:
+
+- With only app names, output conservative classification, likely roles/workflows, current RPA profile, adjacent expansion directions, and verification questions.
+- Do not assert customer type, organization structure, leadership intent, true pain points, or ROI without evidence.
+- If ERP/system is missing, explicitly flag ERP replacement risk as unverified.
+- If runtime data is missing, do not equate app count with value.
+
+## Required Thinking Flow
+
+Follow these steps in order:
+
+1. Identify input completeness and current objective.
+2. Standardize app names while preserving original names in output.
+3. Decompose each app name into platform, business object, action, data/file type, and business intent.
+4. Match app -> business object -> action -> role -> workflow -> opportunity point.
+5. Judge confidence, automation level, and pain type.
+6. Aggregate the customer's RPA usage profile.
+7. Compare with the opportunity map by role/workflow coverage.
+8. Find only related gaps near existing apps or data chains.
+9. Generate adjacent expansion suggestions.
+10. Identify AI+RPA upgrade paths.
+11. Risk-filter and prioritize P0/P1/P2.
+12. Output CSM next-step actions.
+13. Run the verification checklist.
+
+## Classification Rules
+
+### Role Matching
+
+Use business object first, action second, platform third, and customer background only as a correction.
+
+| App signals | Primary role |
 |---|---|
-| 只有应用名称 | 只基于应用名称做归类和保守推断 |
-| 缺客户类型 | 不强行判断品牌 / 精品 / 精铺 / 铺货，只输出“疑似” |
-| 缺类目 / 品类 | 不做类目特定痛点判断 |
-| 缺 ERP / 系统 | 输出替代风险时提示“需确认 ERP 覆盖情况” |
-| 缺团队规模 | 不判断组织成熟度，只建议可能触达角色 |
-| 缺运行频率 | 不判断价值高低，只判断应用语义和拓展潜力 |
-| 缺业务目标 | 默认按“需求挖掘 + AI+RPA 拓展”处理 |
+| ads, ACOS, CPC, SP/SB/SD, bulk, keyword, negative keyword, budget, campaign | Ad operations |
+| bills, settlement, reconciliation, invoices, tax, fees, profit, payment, vouchers | Finance/reconciliation |
+| orders, labels, shipping, logistics, warehouse, inventory, FBA shipment, overseas warehouse | Warehouse/logistics |
+| suppliers, purchasing, 1688, inquiry, reminder, delivery date, factory, replenishment | Supply chain/procurement |
+| reviews, emails, tickets, refunds, returns, claims, account health, negative reviews | Customer service/after-sales |
+| listing, title, bullet points, variation, publishing, A+, images | Operations |
+| BSR, competitors, new products, category, market research, pricing band, sales estimate | Product research |
+| influencers, KOL, TikTok creators, Instagram, YouTube, social, content | Marketing |
+| daily report, monthly report, dashboard, performance, profit attribution, management report | Management decision |
 
-核心原则：
+### Ambiguous Terms
 
-> **字段缺失时，不追问、不瞎猜；先输出可判断内容，再把缺失信息放进待确认问题。**
+- Inventory is not always logistics. Inventory sync/update is logistics; replenishment risk is supply chain/logistics; inventory value and turnover are management/finance; FBA inventory compensation is finance/after-sales.
+- Keywords are not always ads. Ad keywords and negative keywords are ad operations; ABA/search ranking/natural keywords are operations; competitor/category keywords are product research; listing keywords are operations/ad operations.
+- Reviews are not always customer service. Competitor reviews are product research; buyer review replies are after-sales; social comments are marketing; review pain-point extraction is product/operations.
+- FBA depends on suffix. Shipment creation is logistics; inventory difference/compensation is finance/after-sales; FBA fees are finance; FBA replenishment is supply chain/logistics.
+- Reports must be classified by content: sales report, ad report, finance report, executive dashboard, or multi-platform operations report.
 
----
+### Automation Level
 
-## 4. 判断分层：事实 / 推断 / 假设
-
-输出中必须显式区分三类信息。
-
-| 层级 | 定义 | 表达方式 |
-|---|---|---|
-| 已确认事实 | 用户明确给出的应用名称、平台、类目、系统、目标等 | “已知客户有 X 应用” |
-| 合理推断 | 基于应用名称关键词、业务对象、操作动作得出的岗位 / 工作流判断 | “该应用大概率归属广告投放 - 广告数据采集” |
-| 待验证假设 | 基于应用结构推测出的痛点、拓展方向、AI+RPA 升级机会 | “客户可能存在广告报告拿到后仍靠人工分析的问题，需验证” |
-
-禁止表达：
-
-```text
-客户一定存在广告分析效率低的问题。
-客户财务部门一定有对账痛点。
-客户老板一定想看经营看板。
-```
-
-推荐表达：
-
-```text
-从“广告报告下载 / 关键词采集”等应用看，客户已有广告数据采集基础；但是否存在“报告拿到后分析仍靠人工”的痛点，需要通过广告复盘频率、负责人和决策动作进一步验证。
-```
-
----
-
-## 5. 核心处理流程
-
-必须按以下步骤执行，不得跳步。
-
-```text
-Step 1 输入完整度与任务目标识别
-Step 2 应用名称标准化
-Step 3 应用名称语义拆解
-Step 4 岗位 / 工作流 / 机会点匹配
-Step 5 自动化层级与痛点类型判断
-Step 6 聚合客户 RPA 使用画像
-Step 7 对照机会地图覆盖分析
-Step 8 查漏补缺：只找相关缺口
-Step 9 生成相邻链路拓展建议
-Step 10 识别 AI+RPA 升级路径
-Step 11 风险过滤与优先级排序
-Step 12 输出 CSM 下一步作战建议
-Step 13 自检 Red Flags 与 Verification
-```
-
----
-
-## 6. Step 1：输入完整度与目标识别
-
-先判断用户提供了哪些信息：
-
-```text
-是否只有 RPA 应用名称？
-是否补充了客户类型？
-是否补充了类目 / 品类？
-是否补充了平台？
-是否补充了 ERP / 自研系统？
-是否说明了当前目标：续费、增购、AI试点、高层汇报、业务拜访？
-是否提供了应用运行状态：稳定、低频、停用、废弃？
-```
-
-输出强度规则：
-
-| 信息完整度 | 判断标准 | 输出强度 |
-|---|---|---|
-| 高 | 有应用清单 + 客户背景 + 当前目标 + 系统情况 | 可输出明确画像、P0/P1/P2 拓展建议、风险过滤 |
-| 中 | 有应用清单 + 部分客户背景 | 输出画像和方向，但对风险和优先级标注不确定 |
-| 低 | 只有应用名称 | 只输出保守归类、疑似方向、待确认问题 |
-
----
-
-## 7. Step 2：应用名称标准化
-
-对每个应用名称做标准化处理，避免命名不规范导致误判。
-
-| 原始内容 | 标准化处理 |
-|---|---|
-| 大小写混杂 | TikTok / Amazon / Temu 等统一识别 |
-| 版本号 | V1、V2、新版、测试版一般不参与业务判断 |
-| 分隔符 | `_`、`-`、空格、括号统一拆分 |
-| 平台简称 | AMZ、亚马逊统一识别为 Amazon |
-| 业务缩写 | ABA、SP、SB、SD、FBA、FBM、ACOS、SKU、CTR、CVR 等保留为强特征 |
-| 组织或人员命名 | 如“张三测试”“运营部流程”不作为业务对象判断 |
-
-标准化只为辅助判断，不要为了美化而改写用户原始应用名称。输出表格中应保留用户原始应用名称。
-
----
-
-## 8. Step 3：应用名称语义拆解
-
-每个应用名称至少拆成 5 类信息。
-
-| 信息类型 | 示例 | 用途 |
-|---|---|---|
-| 平台 | Amazon、TikTok、Temu、eBay、Shopify、Ozon | 辅助判断业务场景 |
-| 业务对象 | 广告报告、账单、订单、库存、评论、达人、Listing | 决定归属岗位 |
-| 操作动作 | 下载、采集、同步、上传、生成、分析、预警、提交 | 判断自动化层级 |
-| 数据 / 文件类型 | Excel、PDF、账单、报告、截图、邮件、表格 | 判断流程形态 |
-| 业务意图 | 对账、投放、索赔、补货、刊登、复盘、建联 | 匹配工作流和机会点 |
-
-示例：
-
-```text
-ABA搜索词表现_品牌周视图
-```
-
-拆解：
-
-| 字段 | 结果 |
-|---|---|
-| 平台 | Amazon |
-| 业务对象 | ABA 搜索词表现 |
-| 操作动作 | 数据采集 / 报表获取 |
-| 可能岗位 | 运营 / 广告投放 |
-| 可能工作流 | 关键词分析 / 搜索词表现跟踪 |
-| 当前层级 | L1 数据采集 |
-| AI+RPA 潜力 | 关键词趋势分析、Listing 优化建议、广告词根分析 |
-
----
-
-## 9. Step 4：岗位 / 工作流 / 机会点匹配
-
-匹配顺序必须是：
-
-```text
-应用名称 → 业务对象 → 操作动作 → 岗位 → 工作流 → 机会点
-```
-
-不能反过来从机会地图硬套应用。
-
-### 9.1 岗位匹配规则
-
-| 应用关键词 | 优先匹配岗位 |
-|---|---|
-| 广告、ACOS、CPC、SP、SB、SD、Bulk、关键词、否词、预算、Campaign | 广告投放 |
-| 账单、结算、余额、对账、发票、凭证、税单、费用、利润、回款 | 财务对账 |
-| 订单、面单、发货、物流、仓库、库存、FBA货件、海外仓、尾程 | 仓储物流 |
-| 供应商、采购、1688、询价、催单、交期、工厂、备货 | 供应链采购 |
-| 评论、邮件、工单、退款、退货、索赔、账号健康、差评、Review | 客服售后 |
-| Listing、标题、五点、变体、刊登、在架、上下架、A+、图片 | 运营 |
-| BSR、竞品、新品、类目、市场调研、选品、价格带、销量估算 | 产品选品 |
-| 达人、KOL、红人、TikTok达人、Ins、Instagram、YouTube、社媒、内容 | 市场营销 |
-| 日报、月报、看板、经营、绩效、利润归因、管理报表 | 管理决策 |
-
-如果一个应用同时命中多个岗位，按以下顺序判断主归属：
-
-```text
-业务对象优先 → 操作动作辅助 → 平台信息修正 → 客户背景修正
-```
-
-同时在备注中写出次归属和不确定点。
-
-### 9.2 工作流匹配示例
-
-| 应用名称 | 岗位 | 工作流 | 可匹配机会点 |
+| Level | Signals | Current value | Next direction |
 |---|---|---|---|
-| 广告报告下载 | 广告投放 | 广告数据采集与报告 | 多平台广告数据自动汇总 / 广告绩效报告自动生成 |
-| 多平台账单下载 | 财务对账 | 平台账单采集与对账 | 多平台多账号结算报告批量下载 / 月账单批量下载与余额截图 |
-| TikTok 达人数据采集 | 市场营销 | 达人与 KOL 管理 | 红人信息搜集与筛选 / 达人合作名单整理 |
-| 竞品评论采集 | 产品选品 / 运营 | 市场情报采集 / 评论洞察 | 竞品评论分析 / 用户痛点提炼 |
-| FBA 货件创建 | 仓储物流 | FBA 发货与履约 | FBA 货件创建 / 发货资料自动整理 |
-| SKU 利润表汇总 | 财务对账 / 管理决策 | 利润核算与经营分析 | SKU 级利润自动核算 / 异常利润波动识别 |
+| L1 data moving | download, export, scrape, collect, upload, sync, copy, input, screenshot, archive | Reduce repetitive operations | summarize, clean, analyze, alert |
+| L2 rule processing | summarize, clean, compare, validate, classify, rename, match, convert, split, merge | Apply business rules | detect exceptions, explain causes, generate reports |
+| L3 analysis/alerting | analyze, monitor, alert, score, attribute, diagnose, review, trend, anomaly | Support management and decisions | AI+RPA pilot, executive reporting |
+| L4 decision loop | recommend, strategy, auto-handle, auto-submit, smart assignment, dynamic pricing, replenishment/negative-keyword suggestion | High value but high risk | human review, permission boundaries, logs |
 
----
+### Confidence
 
-## 10. Step 5：置信度、自动化层级与痛点类型
+- High: business object and action are clear and match a role/workflow.
+- Medium: the direction is clear but multiple roles may apply.
+- Low: generic names such as "data processing", "operations table", "automation flow", "system sync", "test app". Low-confidence items should not drive strong recommendations.
 
-### 10.1 置信度规则
+## Coverage And Gap Rules
 
-| 置信度 | 判断标准 | 处理方式 |
+Coverage is by role/workflow, not by exact opportunity-map item.
+
+- High coverage: multiple related apps indicate a responsible role, recognition, and usable foundation.
+- Medium coverage: a few related apps; continue probing.
+- Low coverage: almost no related apps; do not push aggressively unless the user's objective or background supports it.
+- Unknown: app names are too generic.
+
+Gap finding must be constrained:
+
+1. First inspect gaps inside high-coverage roles.
+2. Then inspect adjacent data-chain gaps.
+3. Then inspect gaps strongly related to customer type, category, platform, or current objective.
+4. Only then consider executive management or cross-department gaps.
+
+Each gap must explain: map role/workflow, why it is a gap, how it relates to existing apps, why it is worth discussing now, priority, and what to verify.
+
+## Recommendation Priority
+
+P0 means worth discussing immediately. It should be strongly related to existing apps, have available data, a clear stakeholder, explainable value, manageable technical risk, and a natural question from "what happens after the current app runs?"
+
+P1 means suitable for a pilot. It has clear value but needs more samples, business rules, human review, or cross-team coordination.
+
+P2 means reserve for later. It has potential but lacks current asset support, needs new departments, requires more data integration, overlaps heavily with ERP/BI/in-house systems, or is too big for a first conversation.
+
+Prefer these expansion paths in order:
+
+1. Next step of the same app.
+2. Deeper workflow in the same role.
+3. Same data-chain extension.
+4. Upgrade RPA execution into AI+RPA analysis.
+5. Adjust based on the current business objective.
+6. Related gap from the opportunity map.
+7. Entirely new business direction, usually P2 only.
+
+## Risk Filtering
+
+Check every P0/P1 suggestion:
+
+| Risk | Check | Treatment |
 |---|---|---|
-| 高 | 业务对象清晰、操作动作清晰，可唯一或接近唯一匹配岗位 / 工作流 | 可作为主要诊断依据 |
-| 中 | 能判断大方向，但存在两个以上可能归属 | 允许多标签，但必须标主次 |
-| 低 | 名称抽象，无法判断业务对象 | 不进入强建议，只进入待确认问题 |
-
-低置信度示例：
-
-```text
-数据处理
-运营表格
-自动化流程
-报表整理
-系统同步
-测试应用
-```
-
-处理方式：
-
-```text
-该应用名称信息不足，无法稳定匹配机会地图。建议补充使用部门、输入数据、输出结果、运行频率。
-```
-
-### 10.2 自动化层级判断
-
-| 层级 | 关键词 | 典型价值 | 下一步方向 |
-|---|---|---|---|
-| L1 采集搬运型 | 下载、导出、采集、爬取、抓取、上传、同步、复制、录入、截图、归档 | 解决人工重复操作 | 汇总、清洗、分析、预警 |
-| L2 规则处理型 | 汇总、清洗、比对、校验、分类、命名、匹配、格式转换、拆分、合并、识别整理 | 进入业务规则层 | 异常识别、原因归因、自动周报 |
-| L3 分析预警型 | 分析、监控、预警、评分、归因、诊断、复盘、趋势、异常 | 影响管理和决策 | AI+RPA 试点、管理层汇报 |
-| L4 决策闭环型 | 推荐、策略、自动处理、自动提交、智能分配、动态定价、补货建议、否词建议 | 价值高但风险高 | 人工复核、权限边界、日志留痕 |
-
-### 10.3 痛点类型判断
-
-| 痛点类型 | 应用特征 | 判断含义 | 推荐方向 |
-|---|---|---|---|
-| 提效型 | 下载、上传、同步、录入、导出、报表整理 | 人工重复操作多 | RPA / 数据汇总 / 流程自动化 |
-| 增长型 | 广告、关键词、竞品、价格、转化、Listing、红人 | 关注收入、转化、爆款、投产 | AI 分析 / AI+RPA 优化建议 |
-| 管理型 | 看板、日报、月报、异常、预警、利润、绩效 | 管理层想看见过程 | 经营看板 / AI 总结 / 异常监控 |
-| 风险型 | 库存异常、差评、侵权、费用异常、账号健康 | 问题发生后损失大 | 监控预警 / 规则校验 / 人工复核 |
-
-输出时不要强行单选，可表达为：
-
-```text
-当前应用整体偏提效型，但广告、关键词、竞品类应用已具备向增长型场景升级的基础。
-```
-
----
-
-## 11. Step 6：冲突场景匹配规则
-
-以下关键词不能默认归属，必须结合后缀和业务意图判断。
-
-### 11.1 “库存”不要默认归仓储物流
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| 库存同步、库存更新、库存导入平台 | 仓储物流 |
-| 库存预警、补货建议、断货风险 | 供应链采购 / 仓储物流 |
-| 库存周转、库存金额、滞销库存 | 管理决策 / 财务对账 |
-| FBA 库存赔偿、库存差异 | 财务对账 / 客服售后 |
-
-### 11.2 “关键词”不要默认归广告
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| 广告关键词、否词、Bulk、ACOS | 广告投放 |
-| ABA 搜索词、自然词、搜索排名 | 运营 |
-| 竞品关键词、类目关键词、选品词 | 产品选品 |
-| Listing 关键词、标题五点 | 运营 |
-
-### 11.3 “评论”不要默认归客服
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| 竞品评论采集 / 竞品评论分析 | 产品选品 |
-| 买家评论回复 / 差评处理 | 客服售后 |
-| 社媒评论 / 品牌舆情 | 市场营销 |
-| 评论痛点提炼 / 产品改进建议 | 产品选品 / 运营 |
-
-### 11.4 “FBA”要根据后缀判断
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| FBA 货件创建、发货资料 | 仓储物流 |
-| FBA 库存差异、FBA 赔偿 | 财务对账 / 客服售后 |
-| FBA 费用、仓储费、赔偿账单 | 财务对账 |
-| FBA 补货、库容、断货 | 供应链采购 / 仓储物流 |
-
-### 11.5 “报表 / 月报 / 日报”不能只看名字
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| 销售日报 | 运营 |
-| 广告日报 | 广告投放 |
-| 财务月报 | 财务对账 |
-| 经营看板 / 老板看板 | 管理决策 |
-| 多平台运营月报 | 运营 / 管理决策 |
-
-### 11.6 “价格”要区分定价、竞品、利润和控价
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| 竞品价格监控、到手价监控 | 产品选品 / 运营 |
-| 动态调价、价格策略 | 运营 / 管理决策 |
-| 利润价格测算、毛利测算 | 财务对账 / 管理决策 |
-| 渠道控价、乱价监控 | 市场营销 / 运营 |
-
-### 11.7 “Listing”要区分内容生产和刊登执行
-
-| 应用名称特征 | 优先归属 |
-|---|---|
-| Listing 生成、标题五点生成、文案生成 | 运营 / 市场营销 |
-| Listing 刊登、上下架、变体维护 | 运营 |
-| Listing 关键词优化 | 运营 / 广告投放 |
-| Listing 图片、A+页面素材 | 设计 / 运营 / 市场营销 |
-
----
-
-## 12. Step 7：聚合客户 RPA 使用画像
-
-对所有应用做整体分析，必须回答：
-
-1. 哪些岗位覆盖最多？
-2. 哪些工作流重复最多？
-3. 当前偏提效、增长、管理还是风险控制？
-4. 当前自动化成熟度处于 L1-L4 哪一层？
-5. 是否已经具备 AI+RPA 升级基础？
-6. 哪些应用名称置信度高，哪些需要补充信息？
-7. 是否存在“应用很多但价值停留在下载 / 同步”的问题？
-8. 是否存在“某个部门已被打开，可以同岗位加深”的机会？
-
-注意：
-
-> 客户类型、赚钱逻辑、业务模式只能作为修正项，不能替代应用资产分析主线。
-
----
-
-## 13. Step 8：对照机会地图覆盖分析
-
-如任务中提供《跨境电商：自动化机会地图.xlsx》或类似机会地图，必须优先作为参照。
-
-机会地图可能包含：
-
-- 岗位 / 业务模块
-- 流程节点 / 工作流
-- 自动化机会点
-- 能力类型：RPA / AI / AI+RPA
-- What / Impact / 效能提升描述
-
-使用原则：
-
-1. 机会地图是参照系，不是复制源。
-2. 覆盖分析以岗位 / 工作流为主，不要求逐条匹配全部机会点。
-3. 输出时只保留与客户已有应用相关的高 / 中覆盖模块，以及值得说明的低覆盖模块。
-4. 低覆盖不等于应该推荐；需要判断是否与客户类型、业务目标或相邻链路相关。
-
-覆盖情况定义：
-
-| 覆盖情况 | 定义 |
-|---|---|
-| 高 | 已有多个相关应用，说明客户有基础、有认知、有负责人 |
-| 中 | 已有少量相关应用，可继续试探 |
-| 低 | 几乎没有应用覆盖，不建议贸然强推 |
-| 未知 | 应用名称信息不足 |
-
----
-
-## 14. Step 9：查漏补缺规则
-
-查漏补缺必须是“受约束的查漏补缺”，不是把机会地图上客户没做的全部列出来。
-
-优先顺序：
-
-```text
-1. 先查客户已有高覆盖岗位下的缺口；
-2. 再查与已有应用相邻的数据链路缺口；
-3. 再查与客户类型、类目、平台强相关的缺口；
-4. 最后才查高层管理、跨部门协同类缺口。
-```
-
-可推荐缺口类型：
-
-| 缺口类型 | 是否推荐 | 说明 |
-|---|---|---|
-| 同岗位缺口 | 优先推荐 | 客户已有该岗位应用，拓展阻力低 |
-| 相邻链路缺口 | 优先推荐 | 可以从已有数据 / 流程自然延伸 |
-| 客户类型强相关缺口 | 可以推荐 | 如精品型缺广告分析，品牌型缺评论舆情 |
-| 高层管理缺口 | 视目标推荐 | 若目标是高层汇报 / 增购，可推荐经营看板类 |
-| 完全无关缺口 | 不推荐 | 只是地图上存在，不代表现在适合聊 |
-
-每个查漏补缺建议必须说明：
-
-```text
-它属于地图中的哪个岗位 / 工作流？
-为什么这个缺口和客户已有应用相关？
-为什么现在值得聊？
-它适合 P0、P1 还是 P2？
-需要补充确认什么信息？
-```
-
-核心约束：
-
-> **查漏补缺不是为了补齐地图，而是为了发现“客户已有应用附近的高价值空白”。只有当缺口与已有应用、客户类型、业务目标或相邻数据链路存在明确关系时，才允许进入推荐列表。**
-
----
-
-## 15. Step 10：拓展建议生成规则
-
-### 15.1 推荐优先级
-
-推荐必须从客户已有应用的相邻链路长出来，优先级如下：
-
-```text
-1. 同应用下一步
-2. 同岗位加深
-3. 同数据链路延伸
-4. RPA 执行层升级为 AI+RPA 分析层
-5. 当前业务目标修正
-6. 对照场景地图查漏补缺
-7. 全新业务方向
-```
-
-全新业务方向通常只允许进入 P2，除非用户明确提供了业务目标或客户背景证据。
-
-### 15.2 路径 1：同应用下一步
-
-| 已有应用 | 下一步 |
-|---|---|
-| 广告报告下载 | 广告报告汇总 → 异常分析 → 优化建议 → 周报生成 |
-| 账单下载 | 自动归档 → 数据对账 → 差异标记 → 异常费用预警 |
-| 评论采集 | 评论清洗 → 标签分类 → 差评归因 → 产品改进建议 |
-| 达人采集 | 达人建表 → 达人评分 → 建联跟进 → 投放效果复盘 |
-
-### 15.3 路径 2：同岗位加深
-
-如果客户某岗位已有多个应用，说明该岗位可能有负责人、有认知、有使用基础。
-
-示例：
-
-```text
-已有广告报告下载、关键词采集、Bulk 报表处理
-→ 可推荐广告绩效周报、词根广告数据聚合分析、广告异常消耗预警、低效词识别。
-```
-
-### 15.4 路径 3：同数据链路延伸
-
-沿数据流往后走。
-
-```text
-订单下载 → 面单生成 → 物流追踪 → 异常预警 → 售后通知
-```
-
-```text
-账单下载 → 对账 → 差异识别 → 利润核算 → 经营看板
-```
-
-### 15.5 路径 4：RPA 执行层升级 AI+RPA 分析层
-
-| 当前 RPA | AI+RPA 升级 |
-|---|---|
-| 下载广告报告 | AI 生成广告周报、识别异常消耗 |
-| 采集评论 | AI 提炼用户痛点、差评归因 |
-| 采集竞品价格 | AI 识别促销节奏、价格带变化 |
-| 下载账单 | AI 解释差异、识别异常费用 |
-| 采集达人数据 | AI 评分达人质量、判断品牌匹配度 |
-
-### 15.6 路径 5：业务目标修正
-
-| 当前目标 | 推荐偏好 |
-|---|---|
-| 续费 | 优先总结已用价值 + 找低阻力升级 |
-| 增购 | 优先跨部门拓展 + 管理层可见价值 |
-| AI 试点 | 优先选择已有数据基础的 AI+RPA 场景 |
-| 高层汇报 | 优先推荐经营看板、利润归因、业务周报 |
-| 业务拜访 | 优先给切入话术和待确认问题 |
-| 需求挖掘 | 优先输出 P0 / P1 / P2 方向 |
-
----
-
-## 16. Step 11：优先级判断规则
-
-### 16.1 P0：马上值得聊
-
-必须满足大部分条件：
-
-1. 与已有应用强相关；
-2. 数据基础已经存在；
-3. 触达对象明确；
-4. 业务价值容易解释；
-5. 不高度依赖 ERP / API 已覆盖功能；
-6. 技术落地风险相对可控；
-7. 能做出可展示结果；
-8. 能从“现有应用跑完之后下一步怎么办”自然问出来。
-
-示例：
-
-```text
-广告报告下载 → 广告绩效周报自动生成
-评论采集 → 差评归因与产品改进建议
-账单下载 → 异常费用识别
-```
-
-### 16.2 P1：适合试点
-
-通常价值高，但需要进一步确认：
-
-1. AI 价值明显；
-2. 需要业务规则或人工复核；
-3. 需要更多样本数据；
-4. 跨部门协同稍复杂；
-5. 适合作为 AI+RPA 共创试点。
-
-示例：
-
-```text
-动态定价建议
-补货建议生成
-达人质量评分
-利润归因分析
-```
-
-### 16.3 P2：后续储备
-
-具备潜力，但当前基础不足：
-
-1. 当前没有明显相关应用；
-2. 需要新部门介入；
-3. 依赖较多业务数据打通；
-4. 容易和 ERP / BI / 自研系统重合；
-5. 不适合第一次拜访强推。
-
-示例：
-
-```text
-全公司经营实时看板
-完整供应链协同平台
-跨部门绩效自动播报
-```
-
----
-
-## 17. Step 12：风险过滤规则
-
-每个 P0 / P1 建议必须检查以下风险。风险不是为了否定场景，而是为了决定怎么包装和推进。
-
-| 风险类型 | 检查问题 | 处理方式 |
-|---|---|---|
-| ERP 替代风险 | 领星、积加、店小秘、马帮是否已有类似功能？ | 如果高度覆盖，不作为主推；转向跨平台、长尾、非标流程 |
-| API 替代风险 | 是否是标准系统间数据同步，更适合接口？ | 不包装成 RPA 优势，改讲非标补充或流程编排 |
-| 自研替代风险 | 客户是否有 IT / 开发能力？ | 强调快速验证、低成本试点、业务自助配置 |
-| 页面稳定性风险 | 是否涉及复杂网页、高频改版、验证码、强风控？ | 降低承诺，增加人工兜底或改用文件/API |
-| AI 信任风险 | 是否涉及侵权、广告否词、财务金额、定价等高风险判断？ | 不做全自动决策，改为候选清单 + 人工确认 |
-| 业务责任风险 | AI 建议错了谁负责？是否有复核机制？ | 设置人工审核、权限边界、日志留痕 |
-| 数据口径风险 | 多平台 / 多账号数据口径是否一致？ | 先做样本验证，不直接承诺全量准确 |
-| 组织协同风险 | 是否需要跨部门确认规则、权限、数据归属？ | 先选单部门小试点，再扩展 |
-
-包装原则：
-
-不要包装成：
-
-```text
-AI 自动否词
-```
-
-应该包装成：
-
-```text
-AI 生成低效词候选清单，运营人工确认后由 RPA 批量执行。
-```
-
----
-
-## 18. Anti-rationalizations：禁止 AI 偷懒
-
-| AI 常见偷懒借口 | 为什么不允许 | 正确做法 |
-|---|---|---|
-| “应用名称太少，无法分析” | CSM 经常只有少量应用名，仍然需要初判 | 输出保守判断 + 低置信度 + 待确认问题 |
-| “客户有广告应用，所以推荐所有广告场景” | 这是机械扩展，不是相邻链路判断 | 说明从哪个应用、哪个数据、哪个下一步长出来 |
-| “机会地图里有很多方向，应该全部列出” | 信息过载，且不服务下一步沟通 | 只列与已有应用 / 客户背景 / 业务目标相关的缺口 |
-| “AI+RPA 场景越高级越好” | 高级场景常伴随信任、责任、权限风险 | 优先推荐有数据基础、可复核、可展示的试点 |
-| “RPA 应用越多说明价值越高” | 应用可能低频、废弃、被系统替代 | 只说覆盖广，不直接等同于价值高；需验证使用频率和业务影响 |
-| “客户已经用了下载类应用，再做更多下载就好” | 下载类容易被 ERP/API 替代，续费价值弱 | 从下载后的汇总、分析、预警、周报切入 |
-| “高层最爱看经营看板，所以直接推荐看板” | 没有数据链路和管理动作，看板容易空 | 先验证数据来源、指标口径、使用场景和管理节奏 |
-| “应用名称命中关键词就能确定部门” | 库存、关键词、评论、FBA、报表等词有多归属 | 必须结合后缀、动作、平台和备注判断主次归属 |
-
----
-
-## 19. Red Flags：输出异常信号
-
-如果输出出现以下情况，必须重写或修正：
-
-1. 直接罗列一堆跨境电商自动化场景，但没有说明与已有应用的关系。
-2. 把“可能存在”写成“客户一定存在”。
-3. P0 建议不是从已有应用、同岗位、同数据链路或明确业务目标长出来的。
-4. 没有对 ERP/API/自研/网页稳定性/AI 信任风险做过滤。
-5. 输出里没有待确认问题。
-6. 没有区分高 / 中 / 低置信度。
-7. 把机会地图当成清单复读。
-8. 直接推荐“AI 自动决策 / 自动调价 / 自动否词 / 自动定价”，但没有人工复核机制。
-9. 应用归类只看关键词，没有解释业务对象和操作动作。
-10. CSM 下一步建议很虚，比如“加强沟通、持续跟进、挖掘需求”，但没有具体问法。
-11. 没有模块小结，导致 CSM 看完表格仍不知道结论。
-12. 忽略“当前目标”，例如续费场景却只推荐大而复杂的新项目。
-
----
-
-## 20. 输出密度控制
-
-默认控制：
-
-| 模块 | 密度要求 |
-|---|---|
-| 应用画像 | 1 段，不超过 180 字 |
-| 应用归类表 | 应用少于 20 个时完整列出；超过 20 个时可聚合展示并说明省略规则 |
-| 机会地图覆盖分析 | 聚焦高 / 中覆盖模块，不全量复读地图 |
-| 查漏补缺 | 最多 5 个，必须与已有应用或客户背景相关 |
-| P0 建议 | 最多 3 个 |
-| P1 建议 | 最多 3 个 |
-| P2 建议 | 最多 2 个 |
-| AI+RPA 升级路径 | 最多 5 条 |
-| 待确认问题 | 3-5 个 |
-| 每个模块小结 | 1-2 句话 |
-
-原则：
-
-> **宁可少而准，不要多而散。**
-
----
-
-## 21. 标准输出格式
-
-必须严格按以下结构输出。
+| ERP replacement | Does Lingxing, Jijia, Dianxiaomi, Mabang, etc. already cover it? | If highly covered, reposition as cross-platform, long-tail, or non-standard workflow support |
+| API replacement | Is it standard system-to-system sync better handled by API? | Do not frame RPA as the advantage; frame process orchestration or non-standard supplement |
+| In-house replacement | Does the customer have IT/dev capacity? | Emphasize fast validation, low-cost pilot, and business-side configuration |
+| Page stability | Complex pages, frequent redesigns, captcha, anti-bot? | Reduce commitment; prefer files/API or add human fallback |
+| AI trust | Ads, finance, pricing, infringement, refunds, or other high-risk judgments? | Use candidate lists and human confirmation, not full automation |
+| Business ownership | Who is responsible if the AI suggestion is wrong? | Add approval, permission boundaries, and logs |
+| Data definition | Are multi-platform/account metrics consistent? | Validate on samples before promising full accuracy |
+| Organization coordination | Does the flow require cross-team rules or permissions? | Start with one role or one department pilot |
+
+Never package high-risk scenarios as "AI automatically negative-matches", "AI automatically prices", or "AI automatically decides". Package them as "AI generates a candidate list; business users confirm; RPA executes in batch."
+
+## Output Requirements
+
+Default density:
+
+- App profile: one short paragraph.
+- App classification table: list all apps if fewer than 20; otherwise group and disclose grouping.
+- Opportunity coverage: only high/medium coverage and relevant low coverage.
+- Gap analysis: at most 5 gaps.
+- P0 suggestions: at most 3.
+- P1 suggestions: at most 3.
+- P2 suggestions: at most 2.
+- AI+RPA paths: at most 5.
+- Verification questions: 3-5.
+- Add a short module summary after each major module.
+
+Use this exact output structure:
 
 ```markdown
-# 客户 RPA 应用资产诊断与需求拓展分析
+# Customer RPA Asset Diagnosis and Demand Expansion Analysis
 
-## 1. 一句话结论
+## 1. One-Sentence Conclusion
 
-[用 1-2 句话说明：客户当前主要把 RPA 用在哪里、当前应用资产的价值阶段、下一步最适合从哪里拓展。]
+## 2. Input Completeness and Judgment Boundary
 
----
+- Input completeness: high / medium / low
+- Confirmed facts:
+- Reasonable inferences:
+- Hypotheses to verify:
+- Key missing information:
+- Judgment boundary:
 
-## 2. 信息完整度与判断边界
+**Module summary:**
 
-- 当前信息完整度：高 / 中 / 低
-- 已确认事实：
-- 合理推断：
-- 待验证假设：
-- 关键缺失信息：
-- 本次判断边界：
+## 3. Current RPA Usage Profile
 
-**模块小结：** [说明当前哪些判断比较稳，哪些只能作为拜访前假设。]
+**Module summary:**
 
----
+## 4. RPA App Classification Details
 
-## 3. 客户当前 RPA 应用画像
-
-[用一段话总结客户当前 RPA 应用主要集中在哪里、偏提效/增长/管理/风险哪一类、自动化层级、是否具备 AI+RPA 升级基础。]
-
-**模块小结：** [说明客户当前 RPA 使用的主特征，以及下一步拓展的总体方向。]
-
----
-
-## 4. RPA 应用归类明细表
-
-| 应用名称 | 归属岗位 | 对应工作流 | 能力类型 | 自动化层级 | 置信度 | 判断依据 / 备注 |
+| App name | Role | Workflow | Capability type | Automation level | Confidence | Evidence / notes |
 |---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |
 
-**模块小结：** [指出应用主要集中在哪 1-3 个岗位 / 工作流，哪些应用判断较确定，哪些应用需要补充信息。]
+**Module summary:**
 
----
+## 5. Opportunity Map Coverage Analysis
 
-## 5. 机会地图覆盖分析
-
-| 岗位 / 业务模块 | 覆盖情况 | 已有应用特征 | 可拓展空白点 | 判断 |
+| Role / module | Coverage | Existing app signals | Expandable gaps | Judgment |
 |---|---|---|---|---|
-|  |  |  |  |  |
 
-**模块小结：** [概括客户当前覆盖最强和最弱的业务模块，并说明哪些低覆盖模块不适合马上强推。]
+**Module summary:**
 
----
+## 6. Gap Analysis Against Scenario Map
 
-## 6. 对照场景地图查漏补缺
-
-| 缺口方向 | 所属岗位 / 工作流 | 为什么算缺口 | 与已有应用的关系 | 是否建议推进 | 优先级 | 待确认信息 |
+| Gap direction | Role / workflow | Why it is a gap | Relation to existing apps | Recommend? | Priority | Information to verify |
 |---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |
 
-**模块小结：** [说明最值得补的缺口是什么，以及哪些缺口虽然地图上存在但现在不适合优先聊。]
+**Module summary:**
 
----
+## 7. Demand Expansion Directions
 
-## 7. 需求拓展方向
-
-| 优先级 | 拓展方向 | 来源依据 | 推荐原因 | 适合触达对象 | 替代 / 落地风险 |
+| Priority | Direction | Source evidence | Why recommend | Target stakeholder | Replacement / delivery risk |
 |---|---|---|---|---|---|
-| P0 |  |  |  |  |  |
-| P1 |  |  |  |  |  |
-| P2 |  |  |  |  |  |
 
-**模块小结：** [明确下一步最应该先聊哪 1-2 个方向，以及为什么它们比其他方向更适合作为切口。]
+**Module summary:**
 
----
+## 8. AI+RPA Upgrade Paths
 
-## 8. AI+RPA 升级路径
-
-| 已有 RPA 应用 | 当前价值 | 可升级方向 | AI 负责什么 | RPA 负责什么 | 风险控制 |
+| Existing RPA app | Current value | Upgrade direction | AI role | RPA role | Risk control |
 |---|---|---|---|---|---|
-|  |  |  |  |  |  |
 
-**模块小结：** [指出最有 AI+RPA 升级价值的已有应用，以及升级后能解决的是分析、预警、复盘还是决策辅助问题。]
+**Module summary:**
 
----
+## 9. CSM Next-Step Recommendations
 
-## 9. CSM 下一步推进建议
-
-### 9.1 优先切入部门
-
-[建议优先触达的 1-2 个角色，并说明为什么。]
-
-### 9.2 建议切入话题
-
-[围绕已有应用继续追问的问题。不要问“有没有新需求”，要问“应用跑完之后谁看结果、如何复盘、哪些异常仍靠人盯”。]
-
-### 9.3 推荐试点
-
-[建议先做哪个“已有数据基础 + 业务负责人明确 + 可展示结果”的小试点。]
-
-### 9.4 暂不建议推进方向
-
-[列出当前不建议强推的方向及原因。]
-
-### 9.5 待确认问题
+### 9.1 Priority departments
+### 9.2 Suggested conversation topics
+### 9.3 Recommended pilot
+### 9.4 Directions not recommended for now
+### 9.5 Questions to verify
 
 1.
 2.
@@ -873,119 +269,37 @@ AI 生成低效词候选清单，运营人工确认后由 RPA 批量执行。
 4.
 5.
 
-**模块小结：** [说明下一次沟通应该先找谁、先问什么、先验证哪个试点。]
+**Module summary:**
 ```
 
----
+## CSM Question Bank
 
-## 22. CSM 追问话术库
+Prefer concrete questions tied to existing apps:
 
-输出“建议切入话题”时，优先使用以下问法，而不是泛泛问“有没有需求”。
+- Who uses this app now, and how often does it run?
+- After the app runs, who reads the result? Does it enter a daily report, weekly report, or decision process?
+- Does the app mainly save time, or does it affect business judgment?
+- Which three apps are most valuable today, and why?
+- Which apps are low-frequency, stopped, or replaced by ERP/in-house systems?
+- After data is downloaded, who analyzes it? Is there a fixed template or rule?
+- Which exceptions are still found manually?
+- If data is already available, what should AI help inspect next?
+- Which judgments must remain human-reviewed?
+- Should this scenario be a reminder, a recommendation, or an automatic execution?
 
-### 22.1 围绕已有应用价值追问
+## Verification Checklist
 
-```text
-这个应用现在是谁在用？每天 / 每周大概跑几次？
-跑完之后结果给谁看？会进入日报、周报或经营决策吗？
-这个应用解决的是节省时间，还是能影响业务判断？
-目前最有价值的 3 个应用是哪几个？为什么？
-哪些应用已经低频、停用，或者被 ERP / 自研系统替代了？
-```
+Before final delivery, confirm:
 
-### 22.2 围绕“下载后下一步”追问
-
-```text
-数据下载下来以后，下一步是谁分析？
-有没有固定的分析模板或判断规则？
-哪些异常现在还是靠人肉发现？
-有没有人需要定期把这些数据整理成周报 / 月报？
-```
-
-### 22.3 围绕 AI+RPA 升级追问
-
-```text
-如果数据已经能稳定拿到，下一步你们最希望 AI 帮忙看什么？
-哪些判断必须由业务人工确认，不能全自动？
-哪些结果如果能自动形成候选清单，会明显省时间？
-这个场景更适合做提醒、建议，还是自动执行？
-```
-
-### 22.4 围绕风险和边界追问
-
-```text
-这个流程现在有没有被 ERP / API / 自研系统覆盖？
-这个页面稳定吗？有没有验证码、风控、频繁改版？
-如果 AI 给出建议，谁来复核？错了会有什么业务影响？
-这个场景的数据口径谁负责确认？
-```
-
----
-
-## 23. Verification：输出前质量检查
-
-交付前必须自检：
-
-1. 是否基于客户已有应用，而不是泛泛推荐？
-2. 是否在开头说明信息完整度与判断边界？
-3. 是否区分了已确认事实、合理推断、待验证假设？
-4. 每个应用归类是否给出了岗位、工作流、层级、置信度和判断依据？
-5. 每个 P0 / P1 是否能说清楚来源依据？
-6. 是否识别了 ERP / API / 自研 / 页面稳定性 / AI 信任 / 业务责任风险？
-7. 是否输出了“对照场景地图查漏补缺”，且只列出相关缺口？
-8. 是否避免把机会地图复读一遍？
-9. 是否给了 CSM 下一步能直接拿去问客户的话题？
-10. 是否避免把“AI 自动决策”包装成无复核的高风险动作？
-11. 每个输出模块是否都有 1-2 句话模块小结？
-12. 输出是否少而准，没有为了显得全面而堆砌场景？
-13. 如果信息不足，是否把缺失信息放入待确认问题，而不是停止输出？
-
----
-
-## 24. 示例输入
-
-```text
-客户名称：某跨境卖家
-客户类型：精品型，可能有品牌化趋势
-主营平台：Amazon / TikTok
-类目：宠物用品
-当前 ERP / 系统：领星
-当前目标：AI 试点 + 需求挖掘
-
-RPA 应用名称列表：
-1. Amazon 广告报告下载
-2. ABA 搜索词表现品牌周视图
-3. TikTok 达人数据采集
-4. 多平台账单下载
-5. 竞品评论采集
-```
-
----
-
-## 25. 示例输出片段
-
-```markdown
-# 客户 RPA 应用资产诊断与需求拓展分析
-
-## 1. 一句话结论
-
-客户当前 RPA 应用主要集中在广告数据、关键词、达人、财务账单和竞品评论采集，整体处于 L1 数据采集为主、局部具备向 L2/L3 分析复盘升级的阶段。下一步不宜继续横向堆下载类应用，而应优先从“数据拿到后如何分析、预警和形成业务复盘”切入。
-
----
-
-## 2. 信息完整度与判断边界
-
-- 当前信息完整度：中
-- 已确认事实：客户有 Amazon 广告报告、ABA 搜索词、TikTok 达人、多平台账单、竞品评论相关应用。
-- 合理推断：当前应用覆盖广告投放、运营、市场营销、财务对账、产品选品等模块。
-- 待验证假设：客户可能存在数据采集后仍依赖人工分析、周报整理和异常识别的问题。
-- 关键缺失信息：应用运行频率、使用部门、ERP 覆盖情况、广告复盘机制、达人投放流程。
-- 本次判断边界：可以判断应用资产覆盖方向和 AI+RPA 升级机会，但不能断言真实业务痛点和组织优先级。
-
-**模块小结：** 目前应用名称足以判断客户已有多条数据采集链路，但是否具备业务价值，还需要验证这些数据是否进入固定复盘和决策动作。
-```
-
----
-
-## 26. 一句话工作流
-
-> **输入客户 RPA 应用名称 → 标准化名称 → 拆解业务语义 → 匹配岗位 / 工作流 / 机会点 → 判断自动化层级与置信度 → 聚合应用画像 → 对照机会地图查漏补缺 → 生成相邻拓展建议 → 识别 AI+RPA 升级路径 → 过滤风险与优先级 → 输出 CSM 下一步作战卡。**
+1. The output is based on existing customer apps, not generic recommendations.
+2. Input completeness and judgment boundary are stated.
+3. Facts, inferences, and hypotheses are separated.
+4. Each app or app group has role, workflow, level, confidence, and evidence.
+5. Each P0/P1 has clear source evidence from existing apps or data chains.
+6. ERP/API/in-house/page stability/AI trust/business responsibility risks are covered.
+7. Gap analysis only includes related gaps.
+8. The opportunity map is not copied wholesale.
+9. CSM next questions are specific and usable.
+10. No high-risk AI decision is framed as fully automatic without human review.
+11. Each major module has a short summary.
+12. The output is concise and focused.

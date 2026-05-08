@@ -538,6 +538,13 @@ Output strictly in this structure:
 ```markdown
 # Customer Initial Judgment Battle Card
 
+## 0. Executive Abstract
+Write a 300-500 Chinese-character abstract if the final output is Chinese, or a 120-180 word abstract if the final output is English.
+
+The abstract must be placed at the very beginning so a CSM can quickly grasp the report before reading the detailed card. It should summarize: likely customer archetype, money logic, the 1-2 most important pain hypotheses to validate first, the highest-value visit opening, one direction not to lead with, and the immediate next action. Keep it concrete and business-facing; do not introduce unsupported facts, do not list every section, and do not use empty phrases such as "improve efficiency" without specific business actions.
+
+> Summary: This is the "too long; didn't read" version. It should let a busy reader understand the visit strategy first, then choose whether to read the details.
+
 ## 1. One-Sentence Initial Judgment
 Use 1-2 sentences to state the customer's likely type, how it likely makes money, and where it may currently be stuck.
 
@@ -629,16 +636,17 @@ Use 1-2 sentences to state the customer's likely type, how it likely makes money
 
 1. Be concise, like a CSM visit battle card, not a consulting report.
 2. Add 1-2 sentence summaries under modules so structured information is easy to understand.
-3. Do not pile up scenario names; explain why a scenario may matter.
-4. Do not assert pain points directly. Use hypothesis + evidence + validation question.
-5. Do not output too many low-value scenarios. Prioritize Top 3.
-6. Use business language, not overly technical language.
-7. Do not lead with product features. Start from the customer's money logic and business problems.
-8. Avoid vague phrases such as "improve efficiency", "reduce cost", or "empower business" unless tied to concrete business actions.
-9. Make the output executable for CSMs, with questions they can ask directly.
-10. When information is insufficient, say "uncertain, needs validation" instead of pretending.
-11. Do not over-explain the method in the final output; provide the battle card directly.
-12. Do not ask again for information the user has clearly provided.
+3. Start with the executive abstract. It must be readable on its own and must not merely repeat the table headings.
+4. Do not pile up scenario names; explain why a scenario may matter.
+5. Do not assert pain points directly. Use hypothesis + evidence + validation question.
+6. Do not output too many low-value scenarios. Prioritize Top 3.
+7. Use business language, not overly technical language.
+8. Do not lead with product features. Start from the customer's money logic and business problems.
+9. Avoid vague phrases such as "improve efficiency", "reduce cost", or "empower business" unless tied to concrete business actions.
+10. Make the output executable for CSMs, with questions they can ask directly.
+11. When information is insufficient, say "uncertain, needs validation" instead of pretending.
+12. Do not over-explain the method in the final output; provide the battle card directly.
+13. Do not ask again for information the user has clearly provided.
 
 ## 15. Verification
 
@@ -661,6 +669,8 @@ Before final output, self-check every item and revise first if any item fails:
 15. Are CSM next actions included?
 16. Are vague phrases avoided unless tied to concrete business actions?
 17. Is industry common sense kept as hypothesis rather than customer fact?
+18. Is there an executive abstract at the very beginning, with 300-500 Chinese characters or 120-180 English words depending on output language?
+19. Does the abstract summarize the visit strategy rather than merely listing section titles?
 
 A qualified output must:
 
@@ -690,6 +700,11 @@ Known context: has an operations team and values keywords, Listing, and ad perfo
 
 ```markdown
 # Customer Initial Judgment Battle Card
+
+## 0. Executive Abstract
+This customer looks most likely like a boutique-led apparel seller with some brand-transition intent, rather than a pure process-efficiency customer. Its growth probably depends on turning a small set of key products into stronger winners through keywords, Listing quality, ad review, inventory judgment, and feedback loops. For the visit, the CSM should first validate whether keyword/Listing work and ad-review decisions are still handled manually or scattered across systems, because these topics are easy for operations teams to recognize and can reveal roles, frequency, data sources, and decision actions. Do not lead with generic automation, pure dashboards, or ERP-replaceable standard reports. The immediate goal is to ask how key-product operating actions are done today, then decide whether there is a repeatable AI+RPA entry point.
+
+> Summary: Read this first to understand the visit line before entering the detailed evidence.
 
 ## 1. One-Sentence Initial Judgment
 This customer is likely boutique-led with a secondary brand-transition tendency. The core issue may not be simple process efficiency, but more refined keyword, content, ad, and inventory operations around key products.

@@ -5,7 +5,7 @@ description: Diagnose cross-border ecommerce customer RPA application assets and
 
 # Cross-Border Ecommerce RPA Asset Diagnosis
 
-Version: V0.4
+Version: V0.5
 
 Use this skill to diagnose a customer's existing RPA application assets and turn them into adjacent AI+RPA expansion opportunities. The job is not to list every possible automation scenario. The job is to infer the customer's current automation profile, business focus, value gaps, adjacent expansion paths, and the next demand-entry points a CSM should verify.
 
@@ -187,6 +187,7 @@ Never package high-risk scenarios as "AI automatically negative-matches", "AI au
 
 Default density:
 
+- Executive abstract: place a 300-500 Chinese-character "TL;DR / 省流版" at the very front of the output. It should be readable on its own and summarize the one-sentence conclusion, current RPA profile, top 1-3 expansion opportunities, most important AI+RPA upgrade path, key risk or judgment boundary, and the CSM's next action. Do not introduce new facts that are not supported later in the report.
 - App profile: one short paragraph.
 - App classification table: list all apps if fewer than 20; otherwise group and disclose grouping.
 - Opportunity coverage: only high/medium coverage and relevant low coverage.
@@ -202,6 +203,10 @@ Use this exact output structure:
 
 ```markdown
 # Customer RPA Asset Diagnosis and Demand Expansion Analysis
+
+## 0. Executive Abstract / 省流版
+
+Write 300-500 Chinese characters. Summarize the conclusion, current RPA profile, top expansion opportunities, AI+RPA path, key risk or judgment boundary, and CSM next action.
 
 ## 1. One-Sentence Conclusion
 
@@ -302,4 +307,5 @@ Before final delivery, confirm:
 9. CSM next questions are specific and usable.
 10. No high-risk AI decision is framed as fully automatic without human review.
 11. Each major module has a short summary.
-12. The output is concise and focused.
+12. The output starts with a 300-500 Chinese-character executive abstract that can be understood independently.
+13. The output is concise and focused.
